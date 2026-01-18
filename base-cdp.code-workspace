@@ -1,0 +1,19 @@
+{
+  "folders": [
+    {
+      "name": "🌐 Web (Plataforma)",
+      "path": "web"
+    },
+    {
+      "name": "🎨 Studio (CMS Admin)",
+      "path": "studio"
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.next": true
+    }
+  }
+}
