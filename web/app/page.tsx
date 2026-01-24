@@ -10,6 +10,7 @@ import {
   RecentReleasesSection,
   Release,
 } from "@/components/sections/RecentReleasesSection";
+import { VideosSection, VideoItem } from "@/components/sections/VideosSection";
 
 // Query para buscar os eventos
 const EVENTS_QUERY = `*[_type == "event"] | order(dateStart asc) {
@@ -41,6 +42,17 @@ const RELEASES_QUERY = `*[_type in ["event", "sermon", "music", "article"]] | or
   "destinationUrl": coalesce(link, youtubeUrl, spotifyUrl)
 }`;
 
+// 3. NOVA QUERY DE VÍDEOS (Busca todos os vídeos, ordenados por data)
+const VIDEOS_QUERY = `*[_type == "sermon"] | order(publishedAt desc)[0...10] {
+  _id,
+  title,
+  category,
+  youtubeUrl,
+  preacher,
+  thumbnail,
+  publishedAt
+}`;
+
 interface Event {
   _id: string;
   title: string;
@@ -59,10 +71,11 @@ interface Banner {
 
 export default async function Home() {
   // Fetch em paralelo (mais rápido)
-  const [events, banners, releases] = await Promise.all([
+  const [events, banners, releases, videos] = await Promise.all([
     client.fetch<Event[]>(EVENTS_QUERY),
     client.fetch<Banner[]>(BANNERS_QUERY),
     client.fetch<Release[]>(RELEASES_QUERY),
+    client.fetch<VideoItem[]>(VIDEOS_QUERY),
   ]);
 
   return (
@@ -88,6 +101,9 @@ export default async function Home() {
       {/* Bloco Claro: Lançamentos Recentes (Substituindo a antiga lista de eventos simples) */}
       {/* Esta seção agora mostra Eventos, Músicas e Artigos misturados inteligentemente */}
       <RecentReleasesSection items={releases} />
+
+      {/* NOVA SEÇÃO: Vídeos YouTube (Fundo Bege) */}
+      <VideosSection videos={videos} />
 
       {/* 4. Seção de Eventos (Volta para o Fundo Preto do Main) */}
       <section className="container mx-auto px-4 py-24">
