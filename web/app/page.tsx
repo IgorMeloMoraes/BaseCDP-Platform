@@ -3,8 +3,9 @@ import { urlFor } from "@/lib/sanity";
 import Image from "next/image";
 import { Header } from "@/components/layout/Header";
 import { Hero } from "@/components/sections/Hero";
+import { WelcomeSection } from "@/components/sections/WelcomeSection";
 
-// Query antiga (mantivemos para listar os eventos embaixo da capa)
+// Query para buscar os eventos
 const EVENTS_QUERY = `*[_type == "event"] | order(dateStart asc) {
   _id,
   title,
@@ -25,14 +26,18 @@ export default async function Home() {
   const events = await client.fetch<Event[]>(EVENTS_QUERY);
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white selection:bg-white selection:text-black">
-      {/* O Header fica fixo em cima de tudo */}
+    <main className="min-h-screen bg-zinc-950 text-white selection:bg-blue-600 selection:text-white">
+      {/* 1. O Header fica fixo no topo */}
       <Header />
 
-      {/* A Capa Gigante */}
+      {/* 2. Seção Hero (Capa com Vídeo Escuro) */}
       <Hero />
 
-      {/* Seção de Eventos (Exemplo de como o conteúdo entra embaixo) */}
+      {/* 3. NOVA SEÇÃO: Bem-vindo (Fundo Branco) */}
+      {/* Ela entra exatamente aqui, "imprensada" entre o Hero e os Eventos */}
+      <WelcomeSection />
+
+      {/* 4. Seção de Eventos (Volta para o Fundo Preto do Main) */}
       <section className="container mx-auto px-4 py-24">
         <div className="mb-12 flex items-end justify-between border-b border-white/10 pb-6">
           <div>
