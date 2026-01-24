@@ -6,6 +6,10 @@ import { Hero } from "@/components/sections/Hero";
 import { WelcomeSection } from "@/components/sections/WelcomeSection";
 import { CarouselSection } from "@/components/sections/CarouselSection";
 import { ConstructionSection } from "@/components/sections/ConstructionSection";
+import {
+  RecentReleasesSection,
+  Release,
+} from "@/components/sections/RecentReleasesSection";
 
 // Query para buscar os eventos
 const EVENTS_QUERY = `*[_type == "event"] | order(dateStart asc) {
@@ -22,6 +26,19 @@ const BANNERS_QUERY = `*[_type == "carousel" && isActive == true] | order(_creat
   title,
   image,
   link
+}`;
+
+// 2. SUPER QUERY DE LANÇAMENTOS (Automação)
+// Busca em TUDO, ordena por data mista, pega os 3 primeiros
+const RELEASES_QUERY = `*[_type in ["event", "sermon", "music", "article"]] | order(coalesce(publishedAt, dateStart, releaseDate) desc)[0...3] {
+  _id,
+  _type,
+  title,
+  "subtitle": coalesce(description, artist, preacher, location, excerpt),
+  "date": coalesce(publishedAt, dateStart, releaseDate),
+  "image": coalesce(coverImage, thumbnail, image),
+  "slug": slug.current,
+  "destinationUrl": coalesce(link, youtubeUrl, spotifyUrl)
 }`;
 
 interface Event {
@@ -42,9 +59,10 @@ interface Banner {
 
 export default async function Home() {
   // Fetch em paralelo (mais rápido)
-  const [events, banners] = await Promise.all([
+  const [events, banners, releases] = await Promise.all([
     client.fetch<Event[]>(EVENTS_QUERY),
     client.fetch<Banner[]>(BANNERS_QUERY),
+    client.fetch<Release[]>(RELEASES_QUERY),
   ]);
 
   return (
@@ -66,6 +84,10 @@ export default async function Home() {
       {/* NOVA SEÇÃO: Construção (Fundo Preto) */}
       {/* Ela entra logo abaixo do carrossel */}
       <ConstructionSection />
+
+      {/* Bloco Claro: Lançamentos Recentes (Substituindo a antiga lista de eventos simples) */}
+      {/* Esta seção agora mostra Eventos, Músicas e Artigos misturados inteligentemente */}
+      <RecentReleasesSection items={releases} />
 
       {/* 4. Seção de Eventos (Volta para o Fundo Preto do Main) */}
       <section className="container mx-auto px-4 py-24">
