@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Hero } from "@/components/sections/Hero";
 import { WelcomeSection } from "@/components/sections/WelcomeSection";
 import { CarouselSection } from "@/components/sections/CarouselSection";
+import { ConstructionSection } from "@/components/sections/ConstructionSection";
 
 // Query para buscar os eventos
 const EVENTS_QUERY = `*[_type == "event"] | order(dateStart asc) {
@@ -61,6 +62,10 @@ export default async function Home() {
       {/* NOVA SEÇÃO: Carrossel de Destaques (Fundo Escuro) */}
       {/* Decidimos colocar aqui para quebrar o ritmo entre o Welcome branco e os Eventos */}
       <CarouselSection banners={banners} />
+
+      {/* NOVA SEÇÃO: Construção (Fundo Preto) */}
+      {/* Ela entra logo abaixo do carrossel */}
+      <ConstructionSection />
 
       {/* 4. Seção de Eventos (Volta para o Fundo Preto do Main) */}
       <section className="container mx-auto px-4 py-24">
