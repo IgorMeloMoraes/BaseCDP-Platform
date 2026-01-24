@@ -1,8 +1,10 @@
 import { client } from "@/lib/sanity";
 import { urlFor } from "@/lib/sanity";
 import Image from "next/image";
+import { Header } from "@/components/layout/Header";
+import { Hero } from "@/components/sections/Hero";
 
-// GROQ Query - A linguagem de consulta do Sanity (tipo SQL)
+// Query antiga (mantivemos para listar os eventos embaixo da capa)
 const EVENTS_QUERY = `*[_type == "event"] | order(dateStart asc) {
   _id,
   title,
@@ -11,7 +13,6 @@ const EVENTS_QUERY = `*[_type == "event"] | order(dateStart asc) {
   coverImage
 }`;
 
-// Definição do Tipo (TypeScript)
 interface Event {
   _id: string;
   title: string;
@@ -21,53 +22,61 @@ interface Event {
 }
 
 export default async function Home() {
-  // Fetch dos dados (Server Component - Roda no servidor, super rápido)
   const events = await client.fetch<Event[]>(EVENTS_QUERY);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <header className="text-center space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight text-white">
-            Integração Next.js + Sanity 🚀
-          </h1>
-          <p className="text-zinc-400">
-            Se você está vendo os cards abaixo, o backend está conectado!
-          </p>
-        </header>
+    <main className="min-h-screen bg-zinc-950 text-white selection:bg-white selection:text-black">
+      {/* O Header fica fixo em cima de tudo */}
+      <Header />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {events.length > 0 ? (
-            events.map((event) => (
-              <div
-                key={event._id}
-                className="border border-zinc-800 rounded-lg p-4 bg-zinc-900 hover:border-zinc-700 transition"
-              >
-                {event.coverImage && (
-                  <div className="relative w-full h-40 mb-4 rounded-md overflow-hidden">
-                    {/* Usamos urlFor para gerar o link da imagem */}
-                    <Image
-                      src={urlFor(event.coverImage).width(500).url()}
-                      alt={event.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <h2 className="text-xl font-semibold">{event.title}</h2>
-                <p className="text-zinc-400 text-sm mt-1">
-                  📅 {new Date(event.dateStart).toLocaleDateString("pt-BR")}
-                </p>
-                <p className="text-zinc-500 text-sm">📍 {event.location}</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-center col-span-2 text-yellow-500">
-              Nenhum evento encontrado. Vá no Studio e crie um evento!
-            </p>
-          )}
+      {/* A Capa Gigante */}
+      <Hero />
+
+      {/* Seção de Eventos (Exemplo de como o conteúdo entra embaixo) */}
+      <section className="container mx-auto px-4 py-24">
+        <div className="mb-12 flex items-end justify-between border-b border-white/10 pb-6">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tighter uppercase">
+              Próximos Eventos
+            </h2>
+            <p className="text-zinc-400 mt-1">O que está acontecendo na Base</p>
+          </div>
+          <a
+            href="#"
+            className="hidden text-sm font-bold uppercase tracking-wide text-zinc-400 hover:text-white md:block"
+          >
+            Ver Calendário Completo →
+          </a>
         </div>
-      </div>
-    </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {events.map((event) => (
+            <div key={event._id} className="group cursor-pointer">
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-zinc-900 mb-4">
+                {event.coverImage && (
+                  <Image
+                    src={urlFor(event.coverImage).width(800).url()}
+                    alt={event.title}
+                    fill
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                  />
+                )}
+                {/* Data Flutuante */}
+                <div className="absolute top-4 left-4 bg-white text-black px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                  {new Date(event.dateStart).toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "short",
+                  })}
+                </div>
+              </div>
+              <h3 className="text-xl font-bold uppercase leading-tight group-hover:underline decoration-1 underline-offset-4">
+                {event.title}
+              </h3>
+              <p className="text-zinc-500 text-sm mt-2">{event.location}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </main>
   );
 }
