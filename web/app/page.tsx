@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Header } from "@/components/layout/Header";
 import { Hero } from "@/components/sections/Hero";
 import { WelcomeSection } from "@/components/sections/WelcomeSection";
+import { CarouselSection } from "@/components/sections/CarouselSection";
 
 // Query para buscar os eventos
 const EVENTS_QUERY = `*[_type == "event"] | order(dateStart asc) {
@@ -14,6 +15,14 @@ const EVENTS_QUERY = `*[_type == "event"] | order(dateStart asc) {
   coverImage
 }`;
 
+// 2. Query de Banners (Ordenado pelo mais recente)
+const BANNERS_QUERY = `*[_type == "carousel" && isActive == true] | order(_createdAt desc) {
+  _id,
+  title,
+  image,
+  link
+}`;
+
 interface Event {
   _id: string;
   title: string;
@@ -22,8 +31,20 @@ interface Event {
   coverImage: any;
 }
 
+// Interface do Banner
+interface Banner {
+  _id: string;
+  title: string;
+  image: any;
+  link?: string;
+}
+
 export default async function Home() {
-  const events = await client.fetch<Event[]>(EVENTS_QUERY);
+  // Fetch em paralelo (mais rápido)
+  const [events, banners] = await Promise.all([
+    client.fetch<Event[]>(EVENTS_QUERY),
+    client.fetch<Banner[]>(BANNERS_QUERY),
+  ]);
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white selection:bg-blue-600 selection:text-white">
@@ -36,6 +57,10 @@ export default async function Home() {
       {/* 3. NOVA SEÇÃO: Bem-vindo (Fundo Branco) */}
       {/* Ela entra exatamente aqui, "imprensada" entre o Hero e os Eventos */}
       <WelcomeSection />
+
+      {/* NOVA SEÇÃO: Carrossel de Destaques (Fundo Escuro) */}
+      {/* Decidimos colocar aqui para quebrar o ritmo entre o Welcome branco e os Eventos */}
+      <CarouselSection banners={banners} />
 
       {/* 4. Seção de Eventos (Volta para o Fundo Preto do Main) */}
       <section className="container mx-auto px-4 py-24">
